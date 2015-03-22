@@ -36,6 +36,7 @@ class LircSend:
 	_s = None
 	_init = False
 	_lock = Lock()
+	_debug = False
 	
 	def __init__(self, location = None, port = None):
 		if not port:
@@ -45,6 +46,12 @@ class LircSend:
 			self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self._s.connect((location, port))
 		self._init = True
+	
+	def set_debug(self, debug):
+		if debug:
+			self._debug = True
+		else:
+			self._debug = False
 	
 	def destroy(self):
 		try:
@@ -69,24 +76,31 @@ class LircSend:
 			port = DEFAULT_LIRC_PORT
 		return cls(location, port)
 
-	def send_packet(self, command):
+	"""Internal method for communicating with LIRC"""
+	def _send_packet(self, command):
 		if not self._init:
 			raise ValueError("Object has been destroyed")
 		try:
 			self._lock.acquire()
-			message = "SEND_ONCE LED_24_KEY %s\n" % command
-			self._s.sendall(message)
+			self._s.sendall(command)
 			buf = ""
 			while not buf.endswith("END\n"):
 				data = self._s.recv(256)
 				buf += data
-				print data
+				if self._debug:
+					print data
 		finally:
 			self._lock.release()
-
+	
+	def send_once(self, key, remote, repeat = 1):
+		command = "SEND_ONCE %s %s %d\n" % (key, remote, repeat)
+		self._send_packet(command)
 
 lirc = LircSend.create_remote("10.0.2.98")
-lirc.send_packet("ON")
-lirc.send_packet("RED")
-lirc.send_packet("OFF")
+lirc.set_debug(True)
+lirc.send_once("LED_24_KEY", "ON")
+lirc.send_once("LED_24_KEY", "RED")
+lirc.send_once("LED_24_KEY", "GREEN")
+lirc.send_once("LED_24_KEY", "BLUE")
+lirc.send_once("LED_24_KEY", "OFF")
 lirc.destroy()
