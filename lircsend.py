@@ -78,6 +78,7 @@ class LircSend:
 
 	"""Internal method for communicating with LIRC"""
 	def _send_packet(self, command):
+		command = command + "\n"
 		if not self._init:
 			raise ValueError("Object has been destroyed")
 		try:
@@ -134,12 +135,25 @@ class LircSend:
 		return LircResponse(command, success, payload)
 
 	def send_once(self, key, remote, repeat = 1):
-		command = "SEND_ONCE %s %s %d\n" % (key, remote, repeat)
+		command = "SEND_ONCE %s %s %d" % (key, remote, repeat)
 		self._send_packet(command)
 		
 	def list_remotes(self):
-		command = "LIST\n"
+		command = "LIST"
 		return self._send_packet(command).payload
+	
+	def list_remote_codes(self, remote):
+		command = "LIST %s" % remote
+		lirc_result = self._send_packet(command)
+		if lirc_result.success:
+			command_dict = {}
+			for line in lirc_result.payload:
+				line_split = line.split(" ")
+				key = " ".join(line_split[1:len(line_split)])
+				value = line_split[0]
+				command_dict[str(key)] = value
+			return command_dict
+		return None
 
 class LircResponse:
 	def __init__(self, command, success, payload):
