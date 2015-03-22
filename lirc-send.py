@@ -84,6 +84,15 @@ class LircSend:
 			self._lock.acquire()
 			self._s.sendall(command)
 			buf = ""
+			data = ""
+			"""The socket caches IR recieve requests, we need to ignore them"""
+			while not data.startswith("BEGIN"):
+				data = self._s.recv(256)
+				if self._debug:
+					print data
+			buf += data
+			
+			"""Start reading sensible content"""
 			while not buf.endswith("END\n"):
 				data = self._s.recv(256)
 				buf += data
