@@ -135,11 +135,11 @@ class LircSend:
 		return LircResponse(command, success, payload)
 
 	def send_once(self, key, remote, repeat = 1):
-		command = "SEND_ONCE %s %s %d" % (key, remote, repeat)
+		command = "SEND_ONCE %s %s %d" % (remote, key, repeat)
 		self._send_packet(command)
 
 	def send_start(self, key, remote):
-		command = "SEND_START %s %s" % (key, remote)
+		command = "SEND_START %s %s" % (remote, key)
 		self._send_packet(command)
 
 	def send_stop(self):
