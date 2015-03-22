@@ -105,10 +105,3 @@ class LircSend:
 	def send_once(self, key, remote, repeat = 1):
 		command = "SEND_ONCE %s %s %d\n" % (key, remote, repeat)
 		self._send_packet(command)
-
-	def get_remotes(self, remote = None):
-		if not remote:
-			remote = "\"\" \"\""
-
-		command = "VERSION %s" % remote
-		print self._send_packet(command)
