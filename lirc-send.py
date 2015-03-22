@@ -98,6 +98,7 @@ class LircSend:
 				buf += data
 				if self._debug:
 					print data
+			return buf
 		finally:
 			self._lock.release()
 	
@@ -105,11 +106,9 @@ class LircSend:
 		command = "SEND_ONCE %s %s %d\n" % (key, remote, repeat)
 		self._send_packet(command)
 
-lirc = LircSend.create_remote("10.0.2.98")
-lirc.set_debug(True)
-lirc.send_once("LED_24_KEY", "ON")
-lirc.send_once("LED_24_KEY", "RED")
-lirc.send_once("LED_24_KEY", "GREEN")
-lirc.send_once("LED_24_KEY", "BLUE")
-lirc.send_once("LED_24_KEY", "OFF")
-lirc.destroy()
+	def get_remotes(self, remote = None):
+		if not remote:
+			remote = "\"\" \"\""
+
+		command = "VERSION %s" % remote
+		print self._send_packet(command)
