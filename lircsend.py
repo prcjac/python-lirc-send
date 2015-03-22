@@ -98,10 +98,47 @@ class LircSend:
 				buf += data
 				if self._debug:
 					print data
-			return buf
+			return self._parse(buf)
 		finally:
 			self._lock.release()
 	
+	def _parse(self, content):
+		lines = content.split("\n")
+		command = None
+		success = True
+		payload = []
+		started = False
+		payload_parse = False
+		for line in lines:
+			if line == "BEGIN":
+				if not started:
+					started = True
+					payload = []
+			elif line == "SUCCESS" or line == "ERROR":
+				if line == "ERROR":
+					success = False
+				command = '\n'.join(payload)
+				payload = []
+			elif line == "DATA":
+				payload_parse = True
+				payload = []
+			elif line == "END":
+				if payload_parse:
+					"""Dump all elements except the first into the payload"""
+					payload = payload[1:len(payload)]
+					pass
+				break
+			else:
+				if started:
+					payload.append(line)
+		return LircResponse(command, success, payload)
+
 	def send_once(self, key, remote, repeat = 1):
 		command = "SEND_ONCE %s %s %d\n" % (key, remote, repeat)
 		self._send_packet(command)
+
+class LircResponse:
+	def __init__(self, command, success, payload):
+		self.command = command
+		self.success = success
+		self.payload = payload
