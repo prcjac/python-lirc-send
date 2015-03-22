@@ -137,6 +137,14 @@ class LircSend:
 	def send_once(self, key, remote, repeat = 1):
 		command = "SEND_ONCE %s %s %d" % (key, remote, repeat)
 		self._send_packet(command)
+
+	def send_start(self, key, remote):
+		command = "SEND_START %s %s" % (key, remote)
+		self._send_packet(command)
+
+	def send_stop(self):
+		command = "SEND_STOP"
+		self._send_packet(command)
 		
 	def list_remotes(self):
 		command = "LIST"
