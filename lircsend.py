@@ -87,7 +87,7 @@ class LircSend:
 			buf = ""
 			data = ""
 			"""The socket caches IR recieve requests, we need to ignore them"""
-			while not data.startswith("BEGIN"):
+			while not "BEGIN" in data:
 				data = self._s.recv(256)
 				if self._debug:
 					print data
@@ -162,6 +162,10 @@ class LircSend:
 				command_dict[str(key)] = value
 			return command_dict
 		return None
+
+	def send_simulate(self, scancode, repeat, keysym, remote):
+		command = "SIMULATE {0:0>16x} {1:0>2d} {2:s} {3:s}".format(scancode, repeat, keysym, remote)
+		return self._send_packet(command)
 
 class LircResponse:
 	def __init__(self, command, success, payload):
