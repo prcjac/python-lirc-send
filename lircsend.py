@@ -91,6 +91,7 @@ class LircSend:
 				data = self._s.recv(256)
 				if self._debug:
 					print data
+					print(":".join("{}[{:02x}]".format(c, ord(c)) for c in data))
 			buf += data
 			
 			"""Start reading sensible content"""
